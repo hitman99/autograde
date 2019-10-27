@@ -1,19 +1,25 @@
 package state
 
+type State struct {
+	Students []Student `json:"students"`
+}
+
 type Student struct {
 	FirstName string
 	LastName  string
-	Points    []Point
+	UUID      string
+	Scores    []TaskScore
 }
 
-type Point struct {
+type TaskScore struct {
 	Description string
+	UUID        string
 	Value       int
 }
 
 func (s *Student) Total() int {
 	total := 0
-	for _, point := range s.Points {
+	for _, point := range s.Scores {
 		total += point.Value
 	}
 	return total

@@ -3,6 +3,7 @@ module github.com/hitman99/autograde
 go 1.13
 
 require (
+	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20191006152017-6d1ea27df521

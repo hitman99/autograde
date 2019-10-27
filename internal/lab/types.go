@@ -1,7 +1,8 @@
 package lab
 
 import (
-	"github.com/hitman99/autograde/internal/lab/task"
+	"github.com/hitman99/autograde/internal/state"
+	"log"
 	"sync"
 	"time"
 )
@@ -15,16 +16,20 @@ type Lab struct {
 	start        *time.Time
 	duration     time.Duration
 	participants []Assignment
+	state        state.State
+	logger       *log.Logger
 
-	wg       *sync.WaitGroup
-	errChan  <-chan error
-	stopChan chan<- bool
+	wg        *sync.WaitGroup
+	wgErr     *sync.WaitGroup
+	errChan   chan error
+	stopChan  <-chan bool
+	stateChan <-chan *state.TaskScore
 }
 
 type Assignment struct {
 	Description string
 	Student     *Student
-	Tasks       []task.Task
+	Tasks       []Task
 }
 
 type Student struct {
@@ -32,8 +37,4 @@ type Student struct {
 	LastName          string
 	DockerhubUsername string
 	GithubUsername    string
-}
-
-type Definition struct {
-	Name string
 }

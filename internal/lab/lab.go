@@ -2,19 +2,20 @@ package lab
 
 import (
 	"context"
-	"github.com/hitman99/autograde/internal/lab/task"
+	"log"
+	"os"
 	"sync"
 	"time"
 )
 
-func NewLab(name string, cycle uint, duration time.Duration, students []*Student, defs []*task.Definition) *Lab {
+func NewLab(name string, cycle uint, duration time.Duration, students []*Student, defs []*TaskDefinition) *Lab {
 
-	maker := task.NewTaskMaker()
+	maker := NewTaskMaker()
 
 	participants := make([]Assignment, 0, len(students))
 
 	for _, stud := range students {
-		tasks := make([]task.Task, 0, len(defs))
+		tasks := make([]Task, 0, len(defs))
 		for _, def := range defs {
 			studentTask, err := maker.MakeTask(context.TODO(), def, stud)
 			if err != nil {
@@ -37,23 +38,65 @@ func NewLab(name string, cycle uint, duration time.Duration, students []*Student
 		start:        nil,
 		duration:     duration,
 		participants: participants,
+		logger:       log.New(os.Stderr, "[Lab]", log.Ltime),
 	}
 }
 
 func (l *Lab) Run() error {
 	l.wg = &sync.WaitGroup{}
+	l.wgErr = &sync.WaitGroup{}
 	l.errChan = make(chan error)
 	l.stopChan = make(chan bool)
 	l.wg.Add(1)
 
-	go func(stop chan<- bool, wg *sync.WaitGroup, a *Assignment) {
-		for i := 0; i < 10; i++ {
-			a.Tasks[0].Eval()
+	// one go routine per student
+	l.wgErr.Add(1)
+	go func(errs <-chan error, wg *sync.WaitGroup) {
+		defer wg.Done()
+		for err := range errs {
+			log.Printf("error: %s", err.Error())
+			select {
+			case <-errs:
+				break
+			}
+		}
+	}(l.errChan, l.wgErr)
+
+	go func(stop <-chan bool, errs chan<- error, wg *sync.WaitGroup, a *Assignment) {
+		defer wg.Done()
+
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				//do nothing
+			}
+
+			allFinished := true
+			scores := 0
+			for _, t := range a.Tasks {
+				scores += t.GetScore()
+				if !t.IsCompleted() {
+					if err := t.Eval(); err != nil {
+						errs <- err
+					}
+					allFinished = false
+				}
+			}
+			// no need to evaluate further, all finished
+			if allFinished {
+				l.logger.Printf("lab completed by: %s %s, score: %d", a.Student.FirstName, a.Student.LastName, scores)
+				break
+			}
 			time.Sleep(time.Second * 2)
 		}
-	}(l.stopChan, l.wg, &l.participants[0])
+
+	}(l.stopChan, l.errChan, l.wg, &l.participants[0])
 
 	l.wg.Wait()
+	close(l.errChan)
+	l.wgErr.Wait()
 	return nil
 }
 

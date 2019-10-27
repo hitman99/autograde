@@ -6,18 +6,25 @@ import (
 )
 
 type cfg struct {
-	Hostname    string
-	GithubToken string
+	Hostname       string
+	GithubToken    string
+	DevMode        bool
+	KubeconfigPath string
 }
 
 var doOnce sync.Once
+var config *cfg
 
 func GetConfig() *cfg {
-	cfg := &cfg{}
 	doOnce.Do(func() {
+		config = &cfg{}
 		viper.AutomaticEnv()
-		cfg.Hostname = viper.GetString("HOSTNAME")
-		cfg.GithubToken = viper.GetString("GITHUB_TOKEN")
+		config.Hostname = viper.GetString("HOSTNAME")
+		config.GithubToken = viper.GetString("GITHUB_TOKEN")
+		config.DevMode = viper.GetBool("DEV_MODE")
+		if config.DevMode {
+			config.KubeconfigPath = viper.GetString("KUBECONFIG_PATH")
+		}
 	})
-	return cfg
+	return config
 }

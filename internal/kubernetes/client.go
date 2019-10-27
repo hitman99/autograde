@@ -1,10 +1,12 @@
 package kubernetes
 
 import (
+	cfg "github.com/hitman99/autograde/internal/config"
 	"io/ioutil"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"os"
 )
@@ -27,7 +29,15 @@ type kubeClient struct {
 
 func MustNewClient() Client {
 	logger := log.New(os.Stderr, "[Kubernetes Client] ", log.Ltime)
-	config, err := rest.InClusterConfig()
+	var (
+		err    error
+		config *rest.Config
+	)
+	if cfg.GetConfig().DevMode {
+		config, err = clientcmd.BuildConfigFromFlags("", cfg.GetConfig().KubeconfigPath)
+	} else {
+		config, err = rest.InClusterConfig()
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,11 +58,16 @@ func MustNewClient() Client {
 }
 
 func getCurrentNamesapce(logger *log.Logger) (string, error) {
-	ns, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-	if err != nil {
-		return "", err
+	var ns []byte
+	if cfg.GetConfig().DevMode {
+		ns = []byte("autograde")
+	} else {
+		ns, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+		if err != nil {
+			return "", err
+		}
+		logger.Printf("current kubernetes namespace is: %s", string(ns))
 	}
-	logger.Printf("current kubernetes namespace is: %s", string(ns))
 	return string(ns), nil
 }
 

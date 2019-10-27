@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -38,7 +39,11 @@ func (g *ghClient) CheckFork(ctx context.Context, owner, repo string) (bool, err
 		"name":  githubv4.String(repo),
 	})
 	if err != nil {
-		return false, err
+		if err.Error() == fmt.Sprintf("Could not resolve to a Repository with the name '%s'.", repo) {
+			return false, nil
+		} else {
+			return false, err
+		}
 	}
 	return fork.Repository.IsFork, nil
 }
