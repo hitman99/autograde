@@ -84,6 +84,7 @@ func (l *Lab) Run() error {
 					allFinished = false
 				}
 			}
+			a.Score = scores
 			// no need to evaluate further, all finished
 			if allFinished {
 				l.logger.Printf("lab completed by: %s %s, score: %d", a.Student.FirstName, a.Student.LastName, scores)
@@ -102,4 +103,29 @@ func (l *Lab) Run() error {
 
 func (l *Lab) Stop() error {
 	return nil
+}
+
+func (l *Lab) GetState() *LabState {
+	assignments := make([]*AssignmentState, 0, len(l.participants))
+	for _, a := range l.participants {
+		assignments = append(assignments, a.GetState())
+	}
+	return &LabState{
+		Name:        l.Name,
+		Cycle:       l.Cycle,
+		Started:     l.start,
+		Duration:    l.duration,
+		Assignments: assignments,
+	}
+}
+
+func (a *Assignment) GetState() *AssignmentState {
+	tasks := make([]*TaskState, 0, len(a.Tasks))
+	for _, task := range a.Tasks {
+		tasks = append(tasks, task.GetState())
+	}
+	return &AssignmentState{
+		Student: a.Student,
+		Tasks:   tasks,
+	}
 }

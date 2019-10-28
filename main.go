@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/hitman99/autograde/internal/lab"
 	"time"
 )
@@ -13,6 +15,11 @@ func main() {
 			LastName:          "The tester",
 			DockerhubUsername: "hitman99",
 			GithubUsername:    "cloudtr",
+		},{
+			FirstName:         "Test1",
+			LastName:          "The tester1",
+			DockerhubUsername: "xxxx",
+			GithubUsername:    "autograde",
 		},
 		},
 		[]*lab.TaskDefinition{{
@@ -34,6 +41,14 @@ func main() {
 		},
 		},
 	)
+
+	state := labScenario.GetState()
+	bytes, err := json.Marshal(state)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(bytes))
+	return
 	labScenario.Run()
 
 }
