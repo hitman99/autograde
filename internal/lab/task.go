@@ -15,7 +15,8 @@ import (
 )
 
 type Maker interface {
-    MakeTask(ctx context.Context, def *TaskDefinition, s *Student) (Task, error)
+    NewTask(ctx context.Context, def *TaskDefinition, s *Student) (Task, error)
+    MakeTaskFromState(ctx context.Context, state *TaskState, s *Student) (Task, error)
 }
 
 type maker struct {
@@ -116,11 +117,20 @@ func unknownNameError(name string) error {
     return errors.New(fmt.Sprintf("undefined task name: %s", name))
 }
 
-func (m *maker) MakeTask(ctx context.Context, def *TaskDefinition, s *Student) (Task, error) {
-    taskUUID, err := uuid.NewV4()
-    if err != nil {
-        return nil, err
+func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, taskUUID *string, completed *bool) (Task, error) {
+    var (
+        newUUID uuid.UUID
+        err     error
+    )
+    if taskUUID == nil {
+        newUUID, err = uuid.NewV4()
+        if err != nil {
+            return nil, err
+        }
+    } else {
+        newUUID = uuid.FromStringOrNil(*taskUUID)
     }
+
     switch def.Kind {
     case "github":
         switch def.Name {
@@ -131,7 +141,7 @@ func (m *maker) MakeTask(ctx context.Context, def *TaskDefinition, s *Student) (
                 },
                 completed: false,
                 def:       def,
-                uuid:      taskUUID.String(),
+                uuid:      newUUID.String(),
                 logger:    m.logger,
             }, nil
         case "checkBuildAction":
@@ -162,4 +172,12 @@ func (m *maker) MakeTask(ctx context.Context, def *TaskDefinition, s *Student) (
         return nil, unknownKindError(def.Kind)
     }
     return nil, nil
+}
+
+func (m *maker) NewTask(ctx context.Context, def *TaskDefinition, s *Student) (Task, error) {
+    return m.makeTask(ctx, def, s, nil, nil)
+}
+
+func (m *maker) MakeTaskFromState(ctx context.Context, t *TaskState, s *Student) (Task, error) {
+    return m.makeTask(ctx, t.Def, s, &t.UUID, &t.Completed)
 }

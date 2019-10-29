@@ -52,8 +52,9 @@ type TaskState struct {
 }
 
 type AssignmentState struct {
-    Student *Student     `json:"student"`
-    Tasks   []*TaskState `json:"tasks"`
+    Description string       `json:"description"`
+    Student     *Student     `json:"student"`
+    Tasks       []*TaskState `json:"tasks"`
 }
 
 type LabState struct {
