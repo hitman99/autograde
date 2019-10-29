@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/hitman99/autograde/internal/lab"
-	"time"
+    "github.com/hitman99/autograde/internal/lab"
+    "time"
 )
 
 func main() {
@@ -14,27 +12,25 @@ func main() {
 			FirstName:         "Test",
 			LastName:          "The tester",
 			DockerhubUsername: "hitman99",
-			GithubUsername:    "cloudtr",
-		},{
-			FirstName:         "Test1",
-			LastName:          "The tester1",
-			DockerhubUsername: "xxxx",
-			GithubUsername:    "autograde",
+			GithubUsername:    "hitman99",
 		},
 		},
-		[]*lab.TaskDefinition{{
-			Name: "checkFork",
+		[]*lab.TaskDefinition{
+		//    {
+		//	Name: "checkFork",
+		//	Kind: "github",
+		//	Config: map[string]string{
+		//		"repo": "autograde",
+		//	},
+		//	Description: "github fork checker",
+		//	Score:       1,
+		//},
+		{
+			Name: "checkBuildAction",
 			Kind: "github",
 			Config: map[string]string{
 				"repo": "autograde",
-			},
-			Description: "github fork checker",
-			Score:       1,
-		}, {
-			Name: "checkFork",
-			Kind: "github",
-			Config: map[string]string{
-				"repo": "autograde",
+				"buildAction": ".gitignore",
 			},
 			Description: "github fork checker",
 			Score:       7,
@@ -42,13 +38,6 @@ func main() {
 		},
 	)
 
-	state := labScenario.GetState()
-	bytes, err := json.Marshal(state)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(bytes))
-	return
 	labScenario.Run()
 
 }

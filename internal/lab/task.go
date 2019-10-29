@@ -145,6 +145,14 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
                 logger:    m.logger,
             }, nil
         case "checkBuildAction":
+            return &task{
+                evaluator: func() (bool, error) {
+                    return m.githubClient.CheckBuildAction(ctx, s.GithubUsername, def.Config["repo"], def.Config["actionName"])
+                },
+                def: def,
+                uuid: newUUID.String(),
+                logger: m.logger,
+            }, nil
         default:
             return nil, unknownNameError(def.Name)
         }
