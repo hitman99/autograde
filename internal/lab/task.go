@@ -8,6 +8,7 @@ import (
     "github.com/hitman99/autograde/internal/config"
     "github.com/hitman99/autograde/internal/dockerhub"
     "github.com/hitman99/autograde/internal/github"
+    "github.com/hitman99/autograde/internal/hashes"
     "github.com/hitman99/autograde/internal/kubernetes"
     "github.com/hitman99/autograde/internal/rest"
     "log"
@@ -174,13 +175,28 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
                 uuid:   newUUID.String(),
                 logger: m.logger,
             }, nil
-        default:
-            return nil, unknownNameError(def.Name)
-        }
-    case "rest":
-        switch def.Name {
         case "checkEndpointExists":
+            return &task{
+                evaluator: func() (bool, error) {
+                    return m.restClient.CheckEndpoint(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername))
+                },
+                def:    def,
+                uuid:   newUUID.String(),
+                logger: m.logger,
+            }, nil
         case "checkEndpointResult":
+            return &task{
+                evaluator: func() (bool, error) {
+                    sha256Username, err := hashes.GetHash("sha256", s.GithubUsername)
+                    if err != nil {
+                        return false, err
+                    }
+                    return m.restClient.CallEndpoint(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername), *sha256Username)
+                },
+                def:    def,
+                uuid:   newUUID.String(),
+                logger: m.logger,
+            }, nil
         default:
             return nil, unknownNameError(def.Name)
         }
