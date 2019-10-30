@@ -178,7 +178,7 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
         case "checkEndpointExists":
             return &task{
                 evaluator: func() (bool, error) {
-                    return m.restClient.CheckEndpoint(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername))
+                    return m.restClient.CheckEndpointExists(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername))
                 },
                 def:    def,
                 uuid:   newUUID.String(),
@@ -191,7 +191,7 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
                     if err != nil {
                         return false, err
                     }
-                    return m.restClient.CallEndpoint(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername), *sha256Username)
+                    return m.restClient.CheckEndpointResult(fmt.Sprintf("http://%s.%s/%s", def.Config["serviceName"], s.K8sNamespace, s.GithubUsername), *sha256Username)
                 },
                 def:    def,
                 uuid:   newUUID.String(),

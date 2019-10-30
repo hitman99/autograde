@@ -15,8 +15,8 @@ type client struct {
 }
 
 type Client interface {
-	CheckEndpoint(endpoint string) (bool, error)
-	CallEndpoint(endpoint, expectedResult string) (bool, error)
+	CheckEndpointExists(endpoint string) (bool, error)
+	CheckEndpointResult(endpoint, expectedResult string) (bool, error)
 }
 
 func MustNewClient() Client {
@@ -25,14 +25,6 @@ func MustNewClient() Client {
 			Timeout: time.Second * 5,
 		},
 	}
-}
-
-func (c *client) CheckEndpoint(endpoint string) (bool, error) {
-	return false, nil
-}
-
-func (c *client) CallEndpoint(endpoint, expectedResult string) (bool, error) {
-	return false, nil
 }
 
 func (c *client) sendRequest(method, endpoint string) (*http.Response, error)  {
@@ -74,7 +66,7 @@ func (c *client) CheckEndpointResult(endpoint, expectedResult string) (bool, err
 	}
 }
 
-func (c *client) CheckEndpointExists(endpoint, expectedResult string) (bool, error) {
+func (c *client) CheckEndpointExists(endpoint string) (bool, error) {
 	r, err := c.sendRequest("GET", endpoint)
 	if err != nil {
 		return false, err
