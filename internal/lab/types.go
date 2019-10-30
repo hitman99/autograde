@@ -35,6 +35,7 @@ type Student struct {
     LastName          string `yaml:"lastName",json:"lastName"`
     DockerhubUsername string `yaml:"dockerhubUsername",json:"dockerhubUsername"`
     GithubUsername    string `yaml:"githubUsername",json:"githubUsername"`
+    K8sNamespace      string `yaml:"k8sNamespace",json:"k8sNamespace"`
 }
 
 type TaskDefinition struct {

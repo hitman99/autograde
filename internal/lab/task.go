@@ -149,8 +149,8 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
                 evaluator: func() (bool, error) {
                     return m.githubClient.CheckBuildAction(ctx, s.GithubUsername, def.Config["repo"], def.Config["actionName"])
                 },
-                def: def,
-                uuid: newUUID.String(),
+                def:    def,
+                uuid:   newUUID.String(),
                 logger: m.logger,
             }, nil
         default:
@@ -165,7 +165,15 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
         }
     case "kubernetes":
         switch def.Name {
-        case "checkPodImage":
+        case "checkContainerImage":
+            return &task{
+                evaluator: func() (bool, error) {
+                    return m.kubeClient.CheckContainerImage(s.K8sNamespace, def.Config["deploymentLabelSelector"], fmt.Sprintf("%s/%s", s.DockerhubUsername, def.Config["imageName"]))
+                },
+                def:    def,
+                uuid:   newUUID.String(),
+                logger: m.logger,
+            }, nil
         default:
             return nil, unknownNameError(def.Name)
         }
