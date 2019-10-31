@@ -1,0 +1,57 @@
+kind: ConfigMap
+metadata:
+  name: lab-cycle-1
+  namespace: whatnot
+apiVersion: v1
+data:
+  students: |
+    - firstName: The
+      lastName: Student
+      dockerhubUsername: tcentric
+      githubUsername: wjatnot
+      k8sNamespace: sandbox
+  tasks: |
+    - name: checkFork
+      kind: github
+      config: 
+        repo: k8s101
+      description: github build action checke
+      score: 2
+    - name: checkBuildAction
+      kind: github
+      config: 
+        repo: k8s101
+        buildAction: .github/workflows/build.yml
+      description: github fork checke
+      score: 2
+    - name: checkContainerImage
+      kind: kubernetes
+      config: 
+        imageName: k8s101
+        deploymentLabelSelector: lab=microservices
+      description: kubernetes container image check
+      score: 1
+    - name: checkEndpointExists
+      kind: kubernetes
+      config: 
+        serviceName: k8s101
+      description: service endpoint check inside kubernetes
+      score: 1
+    - name: checkEndpointResult
+      kind: kubernetes
+      config: 
+        serviceName: k8s101
+      description: service endpoint result check inside kubernetes
+      score: 1
+    - name: checkRepo
+      kind: dockerhub
+      config: 
+        repo: k8s101
+      description: dockerhub repository existense check
+      score: 1
+    - name: checkTags
+      kind: dockerhub
+      config: 
+        repo: k8s101
+      description: dockerhub repository tags check
+      score: 1
