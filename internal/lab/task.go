@@ -160,7 +160,23 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
     case "dockerhub":
         switch def.Name {
         case "checkRepo":
+            return &task{
+                evaluator: func() (bool, error) {
+                    return m.dockerhubClient.CheckRepo(fmt.Sprintf("%s/%s", s.DockerhubUsername, def.Config["repo"]))
+                },
+                def:    def,
+                uuid:   newUUID.String(),
+                logger: m.logger,
+            }, nil
         case "checkTags":
+            return &task{
+                evaluator: func() (bool, error) {
+                    return m.dockerhubClient.CheckTags(fmt.Sprintf("%s/%s", s.DockerhubUsername, def.Config["repo"]))
+                },
+                def:    def,
+                uuid:   newUUID.String(),
+                logger: m.logger,
+            }, nil
         default:
             return nil, unknownNameError(def.Name)
         }
@@ -203,7 +219,6 @@ func (m *maker) makeTask(ctx context.Context, def *TaskDefinition, s *Student, t
     default:
         return nil, unknownKindError(def.Kind)
     }
-    return nil, nil
 }
 
 func (m *maker) NewTask(ctx context.Context, def *TaskDefinition, s *Student) (Task, error) {
