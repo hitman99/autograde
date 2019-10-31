@@ -27,7 +27,7 @@ func MustNewClient() Client {
 	}
 }
 
-func (c *client) sendRequest(method, endpoint string) (*http.Response, error)  {
+func (c *client) sendRequest(method, endpoint string) (*http.Response, error) {
 	var (
 		req *http.Request
 		err error
