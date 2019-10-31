@@ -17,6 +17,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sys v0.0.0-20191023151326-f89234f9a2c2 // indirect
 	golang.org/x/text v0.3.2 // indirect
+	gopkg.in/yaml.v2 v2.2.4
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
 )

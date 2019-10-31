@@ -103,12 +103,18 @@ func (k *kubeClient) CheckContainerImage(namespace, labelSelector, expectedImage
 }
 
 func (k *kubeClient) GetConfigMap(name, namespace string) (map[string]string, error) {
-    ns, err := getCurrentNamesapce(k.logger)
-    if err != nil {
-        k.logger.Printf("cannot get current namespace: %s", err.Error())
-        return nil, err
+    var cfgNamespace string
+    if namespace == "" {
+        ns, err := getCurrentNamesapce(k.logger)
+        if err != nil {
+            k.logger.Printf("cannot get current namespace: %s", err.Error())
+            return nil, err
+        }
+        cfgNamespace = ns
+    } else {
+        cfgNamespace = namespace
     }
-    cm, err := k.clientset.CoreV1().ConfigMaps(ns).Get(name, v1.GetOptions{})
+    cm, err := k.clientset.CoreV1().ConfigMaps(cfgNamespace).Get(name, v1.GetOptions{})
     if err != nil {
         k.logger.Printf("cannot get configmap %s, %s", name, err.Error())
         return nil, err

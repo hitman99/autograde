@@ -3,6 +3,7 @@ package lab
 import (
     "context"
     "encoding/json"
+    "gopkg.in/yaml.v2"
     "log"
     "os"
     "sync"
@@ -168,4 +169,20 @@ func (a *Assignment) GetState() *AssignmentState {
         Student:     a.Student,
         Tasks:       tasks,
     }
+}
+
+func GetLabScenarioFromConfig(students, tasks string) ([]*Student, []*TaskDefinition, error) {
+    var (
+        stud = []*Student{}
+        taskDefs = []*TaskDefinition{}
+    )
+    err := yaml.Unmarshal([]byte(students), &stud)
+    if err != nil {
+        return nil, nil, err
+    }
+    err = yaml.Unmarshal([]byte(tasks), &taskDefs)
+    if err != nil {
+        return nil, nil, err
+    }
+    return stud, taskDefs, nil
 }
