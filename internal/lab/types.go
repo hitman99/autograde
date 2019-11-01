@@ -1,6 +1,8 @@
 package lab
 
 import (
+	"github.com/go-redis/redis/v7"
+	"github.com/hitman99/autograde/internal/kubernetes"
 	"log"
 	"sync"
 	"time"
@@ -17,10 +19,12 @@ type Lab struct {
 	participants []Assignment
 	logger       *log.Logger
 
-	wg       *sync.WaitGroup
-	wgErr    *sync.WaitGroup
-	errChan  chan error
-	stopChan <-chan bool
+	wg          *sync.WaitGroup
+	wgErr       *sync.WaitGroup
+	errChan     chan error
+	stopChan    chan bool
+	redisClient *redis.Client
+	kubeClient  kubernetes.Client
 }
 
 type Assignment struct {
@@ -31,19 +35,19 @@ type Assignment struct {
 }
 
 type Student struct {
-	FirstName         string `yaml:"firstName",json:"firstName"`
-	LastName          string `yaml:"lastName",json:"lastName"`
-	DockerhubUsername string `yaml:"dockerhubUsername",json:"dockerhubUsername"`
-	GithubUsername    string `yaml:"githubUsername",json:"githubUsername"`
-	K8sNamespace      string `yaml:"k8sNamespace",json:"k8sNamespace"`
+	FirstName         string `yaml:"firstName" json:"firstName"`
+	LastName          string `yaml:"lastName" json:"lastName"`
+	DockerhubUsername string `yaml:"dockerhubUsername" json:"dockerhubUsername"`
+	GithubUsername    string `yaml:"githubUsername" json:"githubUsername"`
+	K8sNamespace      string `yaml:"k8sNamespace" json:"k8sNamespace"`
 }
 
 type TaskDefinition struct {
-	Name        string            `yaml:"name",json:"name"`
-	Kind        string            `yaml:"kind",json:"kind"`
-	Config      map[string]string `yaml:"config",json:"config"`
-	Description string            `yaml:"description",json:"description"`
-	Score       int               `yaml:"score",json:"score"`
+	Name        string            `yaml:"name" json:"name"`
+	Kind        string            `yaml:"kind" json:"kind"`
+	Config      map[string]string `yaml:"config" json:"config"`
+	Description string            `yaml:"description" json:"description"`
+	Score       int               `yaml:"score" json:"score"`
 }
 
 type TaskState struct {

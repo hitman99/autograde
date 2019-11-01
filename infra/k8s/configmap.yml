@@ -1,15 +1,15 @@
 kind: ConfigMap
 metadata:
   name: lab-cycle-1
-  namespace: whatnot
+  namespace: autograde
 apiVersion: v1
 data:
-  students: |
-    - firstName: The
-      lastName: Student
-      dockerhubUsername: tcentric
-      githubUsername: wjatnot
-      k8sNamespace: sandbox
+#  students: |
+#    - firstName: The
+#      lastName: Student
+#      dockerhubUsername: tcentric
+#      githubUsername: wjatnot
+#      k8sNamespace: sandbox
   tasks: |
     - name: checkFork
       kind: github
