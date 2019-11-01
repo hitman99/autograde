@@ -1,11 +1,9 @@
 package rest
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
+	"github.com/hitman99/autograde/internal/utils"
 	"net/http"
 	"time"
 )
@@ -56,7 +54,7 @@ func (c *client) CheckEndpointResult(endpoint, expectedResult string) (bool, err
 	if r.Body != nil {
 		defer r.Body.Close()
 		var response string
-		err := unmarshalResponse(r.Body, &response)
+		err := utils.UnmarshalBody(r.Body, &response)
 		if err != nil {
 			return false, err
 		}
@@ -75,16 +73,4 @@ func (c *client) CheckEndpointExists(endpoint string) (bool, error) {
 		return true, nil
 	}
 	return true, nil
-}
-
-func unmarshalResponse(b io.ReadCloser, target interface{}) error {
-	body, err := ioutil.ReadAll(b)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, target)
-	if err != nil {
-		return err
-	}
-	return nil
 }

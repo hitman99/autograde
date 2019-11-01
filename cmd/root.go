@@ -25,5 +25,6 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "set debug to true or false")
-	rootCmd.AddCommand(serveHttpCmd)
+	rootCmd.AddCommand(apiCmd)
+	rootCmd.AddCommand(signupCmd)
 }

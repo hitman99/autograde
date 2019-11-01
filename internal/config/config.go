@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/spf13/viper"
 	"sync"
+	"time"
 )
 
 type cfg struct {
@@ -11,6 +12,9 @@ type cfg struct {
 	DevMode        bool
 	KubeconfigPath string
 	Configmap      string
+	AdminToken     string
+	CheckInterval  time.Duration
+	RedisAddress   string
 }
 
 var doOnce sync.Once
@@ -24,6 +28,9 @@ func GetConfig() *cfg {
 		config.GithubToken = viper.GetString("GITHUB_TOKEN")
 		config.DevMode = viper.GetBool("DEV_MODE")
 		config.Configmap = viper.GetString("CONFIGMAP_NAME")
+		config.AdminToken = viper.GetString("ADMIN_TOKEN")
+		config.CheckInterval = viper.GetDuration("CHECK_INTERVAL")
+		config.RedisAddress = viper.GetString("REDIS_ADDRESS")
 		if config.DevMode {
 			config.KubeconfigPath = viper.GetString("KUBECONFIG_PATH")
 		}
