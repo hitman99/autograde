@@ -1,0 +1,54 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: signup
+  namespace: autograde
+spec:
+  selector:
+    matchLabels:
+      app: signup
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: signup
+    spec:
+      containers:
+        - name: api
+          image: hitman99/autograde:v0.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - autograde
+            - signup
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+            limits:
+              cpu: "100m"
+          env:
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: autograde
+                  key: ADMIN_TOKEN
+            - name: REDIS_ADDRESS
+              value: "redis:6379"
+      imagePullSecrets:
+        - name: gitlab-com
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: signup
+  namespace: autograde
+spec:
+  selector:
+    app: signup
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

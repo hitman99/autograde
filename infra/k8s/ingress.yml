@@ -1,0 +1,30 @@
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: autograde
+  namespace: autograde
+  annotations:
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^/api(.*)$ $1 break;
+spec:
+  tls:
+    - secretName: autograde-tls
+
+  rules:
+    - host: cb76be97-7731-4cb9-952f-9fc582e10e63.cloudcat.online
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: signup-frontend
+              servicePort: 80
+          - path: /signup
+            backend:
+              serviceName: signup
+              servicePort: 80
+          - path: /lab
+            backend:
+              serviceName: api
+              servicePort: 80
