@@ -15,6 +15,7 @@ type cfg struct {
 	AdminToken     string
 	CheckInterval  time.Duration
 	RedisAddress   string
+	RedisStudKey   string
 }
 
 var doOnce sync.Once
@@ -31,6 +32,7 @@ func GetConfig() *cfg {
 		config.AdminToken = viper.GetString("ADMIN_TOKEN")
 		config.CheckInterval = viper.GetDuration("CHECK_INTERVAL")
 		config.RedisAddress = viper.GetString("REDIS_ADDRESS")
+		config.RedisStudKey = viper.GetString("REDIS_STUDENTS_KEY")
 		if config.DevMode {
 			config.KubeconfigPath = viper.GetString("KUBECONFIG_PATH")
 		}
