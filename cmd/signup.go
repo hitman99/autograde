@@ -22,13 +22,15 @@ var signupCmd = &cobra.Command{
 
 func runSignup() {
 	logger := log.New(os.Stdout, "[signup api] ", log.Ltime)
-	sig := signup.NewSignup()
+	sig := signup.NewSignup(logger)
 	r := mux.NewRouter()
-	r.HandleFunc("/", sig.SignupHandler).Methods("POST")
+	r.HandleFunc("/signup", sig.SignupHandler).Methods("POST")
 	s := r.PathPrefix("/state").Subrouter()
 	s.HandleFunc("/", sig.StateHandler).Methods("GET")
 	amw := api.NewAuthMiddleware(config.GetConfig().AdminToken)
 	s.Use(amw.Middleware)
+
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("frontend/dist"))))
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:80",

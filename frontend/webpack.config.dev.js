@@ -61,7 +61,9 @@ const config = {
         }),
         new HtmlWebpackPlugin({
             template: 'index.html'
-        }),
+        })
+        // ,
+        // new CopyWebpackPlugin([{ from: 'static' }])
     ],
     optimization: {
         splitChunks: {
@@ -92,9 +94,12 @@ const config = {
         extensions: ['.js', '.jsx']
     },
     devServer: {
-        historyApiFallback: true,
+        //historyApiFallback: true,
         proxy: {
-            '/api/*': 'http://localhost:3000'
+            '/signup': {
+                target: 'http://localhost:80',
+                pathRewrite: {'^/signup': ''}
+            }
         }
     }
 };

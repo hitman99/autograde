@@ -62,6 +62,8 @@ const config = {
         new HtmlWebpackPlugin({
             template: 'index.html'
         })
+        // ,
+        // new CopyWebpackPlugin([{ from: 'static' }])
     ],
     optimization: {
         splitChunks: {
