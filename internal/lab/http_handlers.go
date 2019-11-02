@@ -2,6 +2,7 @@ package lab
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/hitman99/autograde/internal/utils"
 	"net/http"
 	"strings"
@@ -86,14 +87,25 @@ func (l *Lab) LabScenarioHandler(w http.ResponseWriter, r *http.Request) {
 			switch c.Action {
 			case "start":
 				err := l.Run()
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 			case "startFromState":
 				err := l.loadStateFromRedis()
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 			case "stop":
 				err := l.Stop()
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 			}
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, "OK")
 		} else {
 			http.Error(w, "request body is nil", http.StatusBadRequest)
 		}
