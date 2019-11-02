@@ -8,7 +8,7 @@ FROM node:12-alpine
 COPY frontend /src
 WORKDIR /src
 
-RUN npm run build
+RUN npm install && npm run build
 
 FROM alpine:3.9
 LABEL maintainer="tomas@adomavicius.com"
