@@ -1,6 +1,6 @@
 kind: ConfigMap
 metadata:
-  name: lab-cycle-1
+  name: lab-1
   namespace: autograde
 apiVersion: v1
 data:

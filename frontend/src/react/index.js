@@ -8,16 +8,17 @@ import {
     Link
 } from "react-router-dom";
 import 'semantic-ui-css/semantic.min.css'
+import LabScenario from "./lab/lab";
 class App extends React.Component {
     render() {
         return (
             <Router>
                 <Switch>
+                    <Route path="/control">
+                        <LabScenario />
+                    </Route>
                     <Route path="/">
                         <SignupForm />
-                    </Route>
-                    <Route path="/state">
-                        {/*signup state for admin TODO*/}
                     </Route>
                 </Switch>
             </Router>

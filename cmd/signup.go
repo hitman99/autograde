@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/hitman99/autograde/internal/api"
 	"github.com/hitman99/autograde/internal/config"
@@ -33,11 +34,11 @@ func runSignup() {
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("frontend/dist"))))
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:80",
+		Addr:         fmt.Sprintf("%s:%s", host, port),
 		Handler:      r,
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 	}
-	logger.Println("started http server on port 80")
+	logger.Printf("started signup http server on port %s", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
 }

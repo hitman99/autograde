@@ -3,6 +3,7 @@ package lab
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/hitman99/autograde/internal/config"
 	"github.com/hitman99/autograde/internal/kubernetes"
@@ -222,7 +223,7 @@ func (a *Assignment) GetState() *AssignmentState {
 	}
 }
 
-func (l *Lab) SetupScenario(name string, cycle uint, duration time.Duration, students []*Student, defs []*TaskDefinition) {
+func (l *Lab) SetupScenario(name, cycle string, duration time.Duration, students []*Student, defs []*TaskDefinition) {
 	maker := NewTaskMaker()
 
 	participants := make([]Assignment, 0, len(students))
@@ -281,6 +282,23 @@ func (l *Lab) saveStateToRedis() {
 			l.logger.Printf("failed to save lab state: %s", err.Error())
 		}
 	}
+}
+
+func (l *Lab) getStudentsFromRedis(listKey string) ([]*Student, error) {
+	studs, err := l.redisClient.LRange(listKey, 0, -1).Result()
+	if err != nil {
+		return nil, fmt.Errorf("redis error: %w", err)
+	}
+	students := make([]*Student, 0, len(studs))
+	for _, st := range studs {
+		stud := Student{}
+		err := json.Unmarshal([]byte(st), &stud)
+		if err != nil {
+			return nil, err
+		}
+		students = append(students, &stud)
+	}
+	return students, nil
 }
 
 func (l *Lab) loadStateFromRedis() error {

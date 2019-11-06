@@ -3,7 +3,9 @@ package kubernetes
 import (
 	cfg "github.com/hitman99/autograde/internal/config"
 	"io/ioutil"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -20,6 +22,8 @@ type PodInfo struct {
 type Client interface {
 	CheckContainerImage(namespace, labelSelector, expectedImage string) (bool, error)
 	GetConfigMap(name, namespace string) (map[string]string, error)
+	CreateNamespace(namespace string) error
+	DeleteNamespace(namespace string) error
 }
 
 type kubeClient struct {
@@ -74,7 +78,7 @@ func getCurrentNamesapce(logger *log.Logger) (string, error) {
 
 func (k *kubeClient) GetCurrentPodInfo() (*PodInfo, error) {
 	podName := os.Getenv("HOSTNAME")
-	pod, err := k.clientset.CoreV1().Pods(k.namespace).Get(podName, v1.GetOptions{})
+	pod, err := k.clientset.CoreV1().Pods(k.namespace).Get(podName, v1meta.GetOptions{})
 	if err != nil {
 		k.logger.Printf("cannot get pod info: %s", err.Error())
 		return nil, err
@@ -86,7 +90,7 @@ func (k *kubeClient) GetCurrentPodInfo() (*PodInfo, error) {
 }
 
 func (k *kubeClient) CheckContainerImage(namespace, labelSelector, expectedImage string) (bool, error) {
-	depList, err := k.clientset.AppsV1().Deployments(namespace).List(v1.ListOptions{
+	depList, err := k.clientset.AppsV1().Deployments(namespace).List(v1meta.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
@@ -114,10 +118,40 @@ func (k *kubeClient) GetConfigMap(name, namespace string) (map[string]string, er
 	} else {
 		cfgNamespace = namespace
 	}
-	cm, err := k.clientset.CoreV1().ConfigMaps(cfgNamespace).Get(name, v1.GetOptions{})
+	cm, err := k.clientset.CoreV1().ConfigMaps(cfgNamespace).Get(name, v1meta.GetOptions{})
 	if err != nil {
 		k.logger.Printf("cannot get configmap %s, %s", name, err.Error())
 		return nil, err
 	}
 	return cm.Data, nil
+}
+
+func (k *kubeClient) CreateNamespace(namespace string) error {
+	_, err := k.clientset.CoreV1().Namespaces().Get(namespace, v1meta.GetOptions{})
+	if err == nil ||  errors.IsNotFound(err){
+		_, err := k.clientset.CoreV1().Namespaces().Create(&v1.Namespace{
+			ObjectMeta: v1meta.ObjectMeta{
+				Name: namespace,
+			},
+		})
+
+		if err != nil {
+			k.logger.Printf("cannot create namespace %s, %s", namespace, err.Error())
+			return err
+		}
+	}
+	if err != nil && errors.IsAlreadyExists(err){
+		return nil
+	} else {
+		return err
+	}
+}
+
+func (k *kubeClient) DeleteNamespace(namespace string) error {
+	err := k.clientset.CoreV1().Namespaces().Delete(namespace, &v1meta.DeleteOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		k.logger.Printf("cannot create namespace %s, %s", namespace, err.Error())
+		return err
+	}
+	return nil
 }

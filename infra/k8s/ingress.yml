@@ -6,19 +6,17 @@ metadata:
   annotations:
     ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^/api(.*)$ $1 break;
 spec:
   tls:
     - secretName: autograde-tls
 
   rules:
-    - host: cb76be97-7731-4cb9-952f-9fc582e10e63.cloudcat.online
+    - host: b79d2d57-c967-4074-948e-3ad103dccedb.lab.cloudcat.online
       http:
         paths:
           - path: /
             backend:
-              serviceName: signup-frontend
+              serviceName: signup
               servicePort: 80
           - path: /signup
             backend:

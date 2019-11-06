@@ -94,11 +94,19 @@ const config = {
         extensions: ['.js', '.jsx']
     },
     devServer: {
-        //historyApiFallback: true,
+        historyApiFallback: true,
         proxy: {
             '/signup': {
                 target: 'http://localhost:80',
                 pathRewrite: {'^/signup': ''}
+            },
+            "/lab/scenario": {
+                target: 'http://localhost:8081',
+                //pathRewrite: {'^/signup': ''}
+            },
+            "/lab/scenario/state": {
+                target: 'http://localhost:8081',
+                //pathRewrite: {'^/signup': ''}
             }
         }
     }
