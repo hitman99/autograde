@@ -1,9 +1,12 @@
 package kubernetes
 
 import (
+	stdErr "errors"
+	"fmt"
 	cfg "github.com/hitman99/autograde/internal/config"
 	"io/ioutil"
 	v1 "k8s.io/api/core/v1"
+	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -24,6 +27,7 @@ type Client interface {
 	GetConfigMap(name, namespace string) (map[string]string, error)
 	CreateNamespace(namespace string) error
 	DeleteNamespace(namespace string) error
+	GetKubeconfig(namespace string) (string, error)
 }
 
 type kubeClient struct {
@@ -139,18 +143,50 @@ func (k *kubeClient) CreateNamespace(namespace string) error {
 			k.logger.Printf("cannot create namespace %s, %s", namespace, err.Error())
 			return err
 		}
+		_, err = k.clientset.RbacV1().RoleBindings(namespace).Create(&v1rbac.RoleBinding{
+			ObjectMeta: v1meta.ObjectMeta{
+				Name:                       "admin",
+			},
+			Subjects:   []v1rbac.Subject{{
+				Kind:      "ServiceAccount",
+				APIGroup:  "",
+				Name:      "default",
+				Namespace: namespace,
+			}},
+			RoleRef:    v1rbac.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     "admin",
+			},
+		})
+		if err != nil {
+			k.logger.Printf("cannot create rolebinding %s, %s", namespace, err.Error())
+			return err
+		}
 	}
-	if err != nil && errors.IsAlreadyExists(err){
-		return nil
+	return nil
+}
+
+func (k *kubeClient) GetKubeconfig(namespace string) (string, error) {
+	sa, err := k.clientset.CoreV1().ServiceAccounts(namespace).Get("default", v1meta.GetOptions{})
+	if err != nil {
+		return "", fmt.Errorf("kubernetes error", err)
+	}
+	if len(sa.Secrets) == 1 {
+		secret, err := k.clientset.CoreV1().Secrets(namespace).Get(sa.Secrets[0].Name, v1meta.GetOptions{})
+		if err != nil {
+			return "", fmt.Errorf("kubernetes error", err)
+		}
+		return fmt.Sprintf(kubeconfig, cfg.GetConfig().KubeApiServerCA, cfg.GetConfig().KubeApiServer, namespace, secret.Data["token"]), nil
 	} else {
-		return err
+		return "", stdErr.New("no secrets found")
 	}
 }
 
 func (k *kubeClient) DeleteNamespace(namespace string) error {
 	err := k.clientset.CoreV1().Namespaces().Delete(namespace, &v1meta.DeleteOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		k.logger.Printf("cannot create namespace %s, %s", namespace, err.Error())
+		k.logger.Printf("cannot delete namespace %s, %s", namespace, err.Error())
 		return err
 	}
 	return nil

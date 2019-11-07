@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: hitman99/autograde:v0.2.2
+          image: hitman99/autograde:0.3.3
           imagePullPolicy: IfNotPresent
           command:
             - autograde
@@ -33,6 +33,16 @@ spec:
                 secretKeyRef:
                   name: autograde
                   key: ADMIN_TOKEN
+            - name: KUBE_API_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: autograde
+                  key: KUBE_API_SERVER
+            - name: KUBE_API_SERVER_CA
+              valueFrom:
+                secretKeyRef:
+                  name: autograde
+                  key: KUBE_API_SERVER_CA
             - name: REDIS_ADDRESS
               value: "redis:6379"
             - name: REDIS_STUDENTS_KEY

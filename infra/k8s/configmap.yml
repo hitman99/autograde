@@ -24,10 +24,22 @@ data:
         buildAction: .github/workflows/release.yml
       description: github fork checke
       score: 2
+    - name: checkRepo
+      kind: dockerhub
+      config:
+        repo: cloud-lab
+      description: dockerhub repository existense check
+      score: 1
+    - name: checkTags
+      kind: dockerhub
+      config:
+        repo: cloud-lab
+      description: dockerhub repository tags check
+      score: 1
     - name: checkContainerImage
       kind: kubernetes
       config: 
-        imageName: cloudlab
+        imageName: cloud-lab
         deploymentLabelSelector: lab=microservices
       description: kubernetes container image check
       score: 1
@@ -42,16 +54,4 @@ data:
       config: 
         serviceName: lab
       description: service endpoint result check inside kubernetes
-      score: 1
-    - name: checkRepo
-      kind: dockerhub
-      config: 
-        repo: cloud-lab
-      description: dockerhub repository existense check
-      score: 1
-    - name: checkTags
-      kind: dockerhub
-      config: 
-        repo: cloud-lab
-      description: dockerhub repository tags check
-      score: 1
+      score: 2
