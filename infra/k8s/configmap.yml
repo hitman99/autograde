@@ -4,12 +4,6 @@ metadata:
   namespace: autograde
 apiVersion: v1
 data:
-#  students: |
-#    - firstName: The
-#      lastName: Student
-#      dockerhubUsername: tcentric
-#      githubUsername: wjatnot
-#      k8sNamespace: sandbox
   tasks: |
     - name: checkFork
       kind: github

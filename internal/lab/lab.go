@@ -69,7 +69,6 @@ func NewLabFromState(state []byte) (*Lab, error) {
 func (l *Lab) Run() error {
     now := time.Now()
     l.wg = &sync.WaitGroup{}
-    l.wgErr = &sync.WaitGroup{}
     l.errChan = make(chan error)
     l.stopChan = make(chan bool)
     l.IsRunning = true
@@ -79,20 +78,9 @@ func (l *Lab) Run() error {
     }
     l.logger.Printf("starting lab scenario: %s. Execution time: %s", l.Name, l.duration.String())
     // one go routine per student
-    l.wgErr.Add(1)
-    go func(errs <-chan error, wg *sync.WaitGroup) {
-        defer wg.Done()
-        for err := range errs {
-            log.Printf("error: %s", err.Error())
-            select {
-            case <-errs:
-                break
-            }
-        }
-    }(l.errChan, l.wgErr)
-    for _, a := range l.participants {
+    for i, _ := range l.participants {
         l.wg.Add(1)
-        go func(stop <-chan bool, errs chan<- error, wg *sync.WaitGroup, a *Assignment) {
+        go func(stop <-chan bool, wg *sync.WaitGroup, a *Assignment) {
             defer wg.Done()
 
             for {
@@ -109,11 +97,7 @@ func (l *Lab) Run() error {
                     scores += t.GetScore()
                     if !t.IsCompleted() {
                         if err := t.Eval(); err != nil {
-                            select {
-                            case errs <- err:
-                            default:
-                            }
-
+                            l.logger.Printf("task eval failed: %s", err.Error())
                         }
                         allFinished = false
                     }
@@ -127,7 +111,7 @@ func (l *Lab) Run() error {
                 time.Sleep(config.GetConfig().CheckInterval)
             }
 
-        }(l.stopChan, l.errChan, l.wg, &a)
+        }(l.stopChan, l.wg, &l.participants[i])
     }
 
     timeLeft := l.duration - time.Now().Sub(*l.start)
@@ -157,7 +141,7 @@ func (l *Lab) Run() error {
             case <-time.After(l.duration - time.Now().Sub(*l.start)):
                 stopCall()
                 return
-            default:
+            //default:
                 //do nothing
             }
         }
@@ -171,8 +155,6 @@ func (l *Lab) Stop() error {
     if l.IsRunning {
         close(l.stopChan)
         l.wg.Wait()
-        close(l.errChan)
-        l.wgErr.Wait()
         l.IsRunning = false
         l.IsFinished = true
         l.start = nil

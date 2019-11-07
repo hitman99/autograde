@@ -22,6 +22,10 @@ spec:
             backend:
               serviceName: signup
               servicePort: 80
+          - path: /state
+            backend:
+              serviceName: signup
+              servicePort: 80
           - path: /lab
             backend:
               serviceName: api

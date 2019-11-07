@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 import {Button, Container, Divider, Grid, Header, Input, Label, Segment} from 'semantic-ui-react'
 import LabState from "./state";
 import StudentTable from "./studentTable";
-import moment from 'moment'
-
 
 class AdminToken extends React.Component {
   constructor(props) {
@@ -51,21 +49,12 @@ export default class LabScenario extends React.Component {
       adminToken: this.getToken(),
       scenario: this.getScenario(),
       labState: {},
-      errorFetching: null,
-      timeLeft: null
+      errorFetching: null
     };
     this.tHandle = null;
     this.fHandle = setInterval(async () => {
       await this.fetchState();
-      this.tHandle = setInterval(() => {
-        let futureDate = moment(this.state.labState.started).add(this.state.labState.duration / 1000000000, 's')
-        if (moment(futureDate).isAfter(moment.now())) {
-          clearInterval(this.tHandle)
-        } else {
-          let timeLeft = moment().to();
-          this.setState({timeLeft})
-        }
-      }, 1000)
+
     }, 10 * 1000)
 
   }
@@ -294,7 +283,6 @@ export default class LabScenario extends React.Component {
               <Grid.Row>
                 <Grid.Column>
                   <Header size='large'> {labState ? labState.name : 'Unknown'} {labState ? labState.cycle : null} </Header>
-                  <Header size='large'> Lab ends: { this.state.timeLeft || 'pending' } </Header>
                 </Grid.Column>
                 <Grid.Column>
                   <LabState count={labState.assignments ? labState.assignments.length : 0}/>

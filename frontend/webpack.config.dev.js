@@ -108,6 +108,10 @@ const config = {
                 target: 'http://localhost:8081',
                 //pathRewrite: {'^/signup': ''}
             },
+            "/state": {
+                target: 'http://localhost:8081',
+                //pathRewrite: {'^/signup': ''}
+            },
             "/lab/scenario/state": {
                 target: 'http://localhost:8081',
                 //pathRewrite: {'^/signup': ''}

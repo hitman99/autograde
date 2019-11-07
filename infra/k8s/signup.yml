@@ -47,6 +47,7 @@ spec:
               value: "redis:6379"
             - name: REDIS_STUDENTS_KEY
               value: "students-lab-1"
+      serviceAccount: autograde
 
 ---
 
