@@ -26,7 +26,7 @@ func runSignup() {
 	sig := signup.NewSignup(logger)
 	r := mux.NewRouter()
 	r.HandleFunc("/signup", sig.SignupHandler).Methods("POST")
-	r.HandleFunc("/{githubUsername}", sig.KubeconfigHandler).Methods("GET")
+	r.HandleFunc("/kubeconfig/{githubUsername}", sig.KubeconfigHandler).Methods("GET")
 
 
 	s := r.PathPrefix("/state").Subrouter()

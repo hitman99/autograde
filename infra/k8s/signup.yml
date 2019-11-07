@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: hitman99/autograde:0.3.3
+          image: hitman99/autograde:0.3.4
           imagePullPolicy: IfNotPresent
           command:
             - autograde
@@ -61,4 +61,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
