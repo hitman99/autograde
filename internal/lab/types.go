@@ -10,7 +10,7 @@ import (
 
 type Lab struct {
 	Name         string
-	Cycle        uint
+	Cycle        string
 	enabled      bool
 	IsRunning    bool
 	IsFinished   bool
@@ -64,7 +64,7 @@ type AssignmentState struct {
 
 type LabState struct {
 	Name        string             `json:"name"`
-	Cycle       uint               `json:"cycle"`
+	Cycle       string               `json:"cycle"`
 	Started     *time.Time         `json:"started"`
 	Duration    time.Duration      `json:"duration"`
 	Assignments []*AssignmentState `json:"assignments"`

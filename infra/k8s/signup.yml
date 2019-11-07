@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: hitman99/autograde:v0.1
+          image: hitman99/autograde:v0.2.2
           imagePullPolicy: IfNotPresent
           command:
             - autograde
@@ -35,8 +35,8 @@ spec:
                   key: ADMIN_TOKEN
             - name: REDIS_ADDRESS
               value: "redis:6379"
-      imagePullSecrets:
-        - name: gitlab-com
+            - name: REDIS_STUDENTS_KEY
+              value: "students-lab-1"
 
 ---
 

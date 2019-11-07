@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: hitman99/autograde:v0.1
+          image: hitman99/autograde:v0.2.2
           imagePullPolicy: IfNotPresent
           command:
             - autograde
@@ -42,10 +42,7 @@ spec:
               value: "1m"
             - name: REDIS_ADDRESS
               value: "redis:6379"
-      imagePullSecrets:
-        - name: gitlab-com
-
----
+      serviceAccount: autograde
 
 ---
 

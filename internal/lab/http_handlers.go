@@ -3,6 +3,7 @@ package lab
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/hitman99/autograde/internal/utils"
 	"net/http"
 	"strings"
@@ -15,7 +16,7 @@ type duration struct {
 
 type labScenario struct {
 	Name        string   `json:"name"`
-	Cycle       uint     `json:"cycle"`
+	Cycle       string     `json:"cycle"`
 	Duration    duration `json:"duration"`
 	StudentsKey string   `json:"studentsKey"`
 	TasksKey    string   `json:"tasksKey"`
@@ -28,6 +29,7 @@ func (d *duration) UnmarshalJSON(b []byte) (err error) {
 
 type labCtrl struct {
 	Action string `json:"action"`
+	RedisKey string `json:"redisKey"`
 }
 
 func (l *Lab) LabScenarioHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,21 +51,10 @@ func (l *Lab) LabScenarioHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			studs, err := l.redisClient.LRange(s.StudentsKey, 0, -1).Result()
+			students, err := l.getStudentsFromRedis(s.StudentsKey)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
-			}
-			students := make([]*Student, 0, len(studs))
-
-			for _, st := range studs {
-				stud := Student{}
-				err := json.Unmarshal([]byte(st), &stud)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-				students = append(students, &stud)
 			}
 
 			_, tasks, err := GetLabScenarioFromConfig("", labConfig["tasks"])
@@ -118,6 +109,42 @@ func (l *Lab) LabStateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(state)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, string(state))
+	}
+}
+
+// this is creating dependencies in Kubernetes for the lab
+func (l *Lab) LabDependencyHandler(w http.ResponseWriter, r *http.Request) {
+	redisKey := mux.Vars(r)["resource"]
+	switch r.Method {
+	case "POST":
+		l.logger.Printf("creating lab scenario [%s] dependencies ", l.Name)
+		// create k8s dependencies
+		students, err := l.getStudentsFromRedis(redisKey)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		for _, stud := range students {
+			err := l.kubeClient.CreateNamespace(stud.K8sNamespace)
+			if err != nil {
+				l.logger.Printf("cannot create namespace %s, %s", stud.K8sNamespace, err.Error())
+			}
+		}
+	case "DELETE":
+		l.logger.Printf("deleting lab scenario [%s] dependencies ", l.Name)
+		// delete k8s dependencies
+		students, err := l.getStudentsFromRedis(redisKey)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		for _, stud := range students {
+			err := l.kubeClient.DeleteNamespace(stud.K8sNamespace)
+			if err != nil {
+				l.logger.Printf("cannot create namespace %s, %s", stud.K8sNamespace, err.Error())
+			}
+		}
 	}
 }
