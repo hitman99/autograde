@@ -26,3 +26,7 @@ spec:
             backend:
               serviceName: api
               servicePort: 80
+          - path: /control
+            backend:
+              serviceName: signup
+              servicePort: 80
