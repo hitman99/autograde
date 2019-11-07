@@ -3,7 +3,7 @@ package rest
 import (
 	"errors"
 	"fmt"
-	"github.com/hitman99/autograde/internal/utils"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -53,12 +53,11 @@ func (c *client) CheckEndpointResult(endpoint, expectedResult string) (bool, err
 	}
 	if r.Body != nil {
 		defer r.Body.Close()
-		var response string
-		err := utils.UnmarshalBody(r.Body, &response)
+		response, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("failed to read response body", err)
 		}
-		return response == expectedResult, nil
+		return string(response) == expectedResult, nil
 	} else {
 		return false, errors.New("response body is nil")
 	}
