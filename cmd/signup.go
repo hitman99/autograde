@@ -31,8 +31,8 @@ func runSignup() {
 	amw := api.NewAuthMiddleware(config.GetConfig().AdminToken)
 	s.Use(amw.Middleware)
 
+	r.PathPrefix("/control").Handler(http.StripPrefix("/control", http.FileServer(http.Dir("frontend/dist"))))
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("frontend/dist"))))
-	r.PathPrefix("/control").Handler(http.FileServer(http.Dir("frontend/dist")))
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%s", host, port),
