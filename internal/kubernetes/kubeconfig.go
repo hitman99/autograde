@@ -13,7 +13,7 @@ contexts:
     user: student
     namespace: %s
   name: cloud-lab
-current-context: autograde
+current-context: cloud-lab
 kind: Config
 preferences: {}
 users:
